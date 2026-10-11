@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Saans Schools, observed PM2.5 from the nearest OpenAQ station
+
+Parameters:
+  OpenAQKey:
+    Type: String
+    NoEcho: true
+    Description: Your OpenAQ API key (free at explore.openaq.org)
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 25
+    MemorySize: 256
+  HttpApi:
+    CorsConfiguration:
+      AllowOrigins:
+        - "*"
+      AllowMethods:
+        - GET
+
+Resources:
+  ObservedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/
+      Handler: observed.handler
+      Environment:
+        Variables:
+          OPENAQ_API_KEY: !Ref OpenAQKey
+      Events:
+        Observed:
+          Type: HttpApi
+          Properties:
+            Path: /observed
+            Method: get
+
+Outputs:
+  ObservedUrl:
+    Description: Paste this into CONFIG.observedUrl in index.html
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/observed"
+

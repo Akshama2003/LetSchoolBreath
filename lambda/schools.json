@@ -1,0 +1,99 @@
+[
+  {
+    "id": "s1",
+    "zone": "Anand Vihar",
+    "school": "Anand Vihar - SBV",
+    "udise": "07040122505",
+    "lat": 28.6525,
+    "lon": 77.3163
+  },
+  {
+    "id": "s2",
+    "zone": "Rohini",
+    "school": "Rohini, Sector 6-SV",
+    "udise": "07010102206",
+    "lat": 28.7103,
+    "lon": 77.1122
+  },
+  {
+    "id": "s3",
+    "zone": "Wazirpur",
+    "school": "Shalimar Bagh, Block AP-GBSSS",
+    "udise": "07010105604",
+    "lat": 28.7014,
+    "lon": 77.1587
+  },
+  {
+    "id": "s4",
+    "zone": "Mayur Vihar",
+    "school": "Mayur Vihar, Phase I, Pkt.IV-SKV",
+    "udise": "07040122001",
+    "lat": 28.6028,
+    "lon": 77.2946
+  },
+  {
+    "id": "s5",
+    "zone": "Okhla",
+    "school": "Tekhand - GGSSS",
+    "udise": "07090119901",
+    "lat": 28.5247,
+    "lon": 77.2838
+  },
+  {
+    "id": "s6",
+    "zone": "Punjabi Bagh",
+    "school": "Punjabi Bagh, No.2-SKV",
+    "udise": "07070110301",
+    "lat": 28.6697,
+    "lon": 77.1312
+  },
+  {
+    "id": "s7",
+    "zone": "R K Puram",
+    "school": "R.K. Puram,Sector-13 G(Co-ed)SV",
+    "udise": "07080116708",
+    "lat": 28.5723,
+    "lon": 77.1835
+  },
+  {
+    "id": "s8",
+    "zone": "Dwarka",
+    "school": "Dr. B. R. Ambedkar CM SHRI School, Sec-5, Dwarka",
+    "udise": "07080113611",
+    "lat": 28.5967,
+    "lon": 77.0531
+  },
+  {
+    "id": "s9",
+    "zone": "Vasant Kunj",
+    "school": "VASANT KUNJ- GBSSS",
+    "udise": "07090116404",
+    "lat": 28.5215,
+    "lon": 77.1621
+  },
+  {
+    "id": "s10",
+    "zone": "Lodhi Road",
+    "school": "Jor Bagh-SV",
+    "udise": "070901ND604",
+    "lat": 28.5881,
+    "lon": 77.219
+  },
+  {
+    "id": "s11",
+    "zone": "Narela",
+    "school": "Narela, Pocket 5 & 6-GGSSS",
+    "udise": "07010100107",
+    "lat": 28.8482,
+    "lon": 77.094
+  },
+  {
+    "id": "s12",
+    "zone": "Jahangirpuri",
+    "school": "Jahangirpuri, Block A- SBV",
+    "udise": "07010101501",
+    "lat": 28.728,
+    "lon": 77.1663
+  }
+]
+

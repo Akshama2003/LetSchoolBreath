@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saans Schools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* School-day visual refresh: warm paper, chalkboard green, classroom blue and friendly motion. */
+:root { --bg:#f5f1e6; --surface:#fffdf7; --surface-2:#e8f2ed; --fg:#183b35; --muted:#58706a; --line:#d7dfd4; --accent:#187d68; --accent-fg:#fff; --font-display:"Bricolage Grotesque",system-ui,sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#14231f; --surface:#1c302a; --surface-2:#263b34; --fg:#eff5e9; --muted:#b3c5b7; --line:#395047; --accent:#6bd3ae; --accent-fg:#11261e; } }
+body { background-image: radial-gradient(#91ad8b22 1px,transparent 1px); background-size:22px 22px; }
+.wrap { gap:30px; }
+.brand b { color:var(--accent); }
+.brand b::before { content:"✿ "; font-size:.72em; }
+.panel,.day,.flow li,.beats,.qa { border-radius:16px; box-shadow:0 7px 22px #203c2810; }
+.panel-h,.d-head { background:linear-gradient(90deg,var(--surface),var(--surface-2)); }
+.verdict { padding:18px; border:1px solid var(--line); border-radius:22px; background:var(--surface); box-shadow:0 10px 28px #203c2812; animation:rise-in .6s ease both; }
+.bignum { border-radius:18px; }
+.row { transition:background .2s ease, transform .2s ease; }
+.row:hover { transform:translateX(3px); }
+.day { animation:rise-in .55s ease both; }
+.day:nth-child(2){animation-delay:.06s}.day:nth-child(3){animation-delay:.12s}.day:nth-child(4){animation-delay:.18s}.day:nth-child(5){animation-delay:.24s}
+.map .dotg .d { animation:school-pulse 3.5s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+.note-box { background:var(--surface); }
+@keyframes rise-in { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+@keyframes school-pulse { 0%,100% { transform:scale(1) } 50% { transform:scale(1.08) } }
+@media (prefers-reduced-motion:reduce) { .verdict,.day,.map .dotg .d { animation:none!important } }
+/* Layout: a morning decision desk. Verdict first, ranked schools on the left, the chosen school's day on the right, then the week and the build. */
+:root {
+  --bg: #E8EEEC;
+  --surface: #F7FAF9;
+  --surface-2: #DDE6E3;
+  --fg: #11201E;
+  --muted: #51625F;
+  --line: #C6D2CF;
+  --accent: #0B6E69;
+  --accent-fg: #FFFFFF;
+  --lv-good: #2E9E5B;  --on-good: #FFFFFF;
+  --lv-sat: #9CC53F;   --on-sat: #11201E;
+  --lv-mod: #F2C230;   --on-mod: #11201E;
+  --lv-poor: #F08A24;  --on-poor: #11201E;
+  --lv-vpoor: #D63A2F; --on-vpoor: #FFFFFF;
+  --lv-sev: #8E1B3A;   --on-sev: #FFFFFF;
+  --font-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B1312; --surface: #121D1C; --surface-2: #1A2928; --fg: #E3EEEC; --muted: #8DA3A0; --line: #243735;
+    --accent: #4FC3B8; --accent-fg: #06201E;
+    --lv-good: #3FB26B; --lv-sat: #A9D14B; --lv-mod: #F2C230; --lv-poor: #F29636; --lv-vpoor: #E2493D; --lv-sev: #B8264C;
+    --on-sat: #0B1312; --on-mod: #0B1312; --on-poor: #0B1312;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0B1312; --surface: #121D1C; --surface-2: #1A2928; --fg: #E3EEEC; --muted: #8DA3A0; --line: #243735;
+  --accent: #4FC3B8; --accent-fg: #06201E;
+  --lv-good: #3FB26B; --lv-sat: #A9D14B; --lv-mod: #F2C230; --lv-poor: #F29636; --lv-vpoor: #E2493D; --lv-sev: #B8264C;
+  --on-sat: #0B1312; --on-mod: #0B1312; --on-poor: #0B1312;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; padding-inline: clamp(16px, 4vw, 40px); padding-block: 0 48px; }
+.wrap { max-width: 1180px; margin-inline: auto; display: flex; flex-direction: column; gap: 28px; }
+h1, h2, h3, p { margin: 0; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; letter-spacing: -0.01em; text-wrap: balance; }
+.label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.lv-good { --c: var(--lv-good); --on: var(--on-good); }
+.lv-sat { --c: var(--lv-sat); --on: var(--on-sat); }
+.lv-mod { --c: var(--lv-mod); --on: var(--on-mod); }
+.lv-poor { --c: var(--lv-poor); --on: var(--on-poor); }
+.lv-vpoor { --c: var(--lv-vpoor); --on: var(--on-vpoor); }
+.lv-sev { --c: var(--lv-sev); --on: var(--on-sev); }
+
+/* top bar */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-block: 18px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: baseline; gap: 12px; }
+.brand b { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; }
+.brand span { color: var(--muted); font-size: 0.9rem; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--muted); }
+.pill { border: 1px solid var(--line); padding: 3px 10px; border-radius: 99px; background: var(--surface); font-size: 0.78rem; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 32px; align-items: center; padding-block: 8px; }
+.verdict { display: flex; gap: 20px; align-items: stretch; }
+.bignum { flex: none; min-width: 96px; background: var(--c); color: var(--on); border-radius: 6px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: clamp(4rem, 9vw, 6.5rem); line-height: 1; padding: 10px 18px; }
+.verdict h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.7rem, 3.6vw, 2.6rem); line-height: 1.05; letter-spacing: -0.025em; text-wrap: balance; }
+.verdict p { color: var(--muted); margin-top: 10px; max-width: 46ch; }
+.verdict > div { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.dist { display: flex; flex-direction: column; gap: 10px; }
+.bar { display: flex; height: 38px; border-radius: 4px; overflow: hidden; gap: 2px; }
+.bar i { display: grid; place-items: center; background: var(--c); color: var(--on); font-style: normal; font-family: var(--font-data); font-weight: 600; font-size: 0.85rem; min-width: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.8rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; background: var(--c); display: inline-block; }
+
+/* workspace */
+.work { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
+.panel-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.rows { display: flex; flex-direction: column; }
+.row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; text-align: left; width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 11px 16px; }
+.row:last-child { border-bottom: 0; }
+.row:hover { background: var(--surface-2); }
+.row[aria-pressed="true"] { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--fg); }
+.chip { background: var(--c); color: var(--on); border-radius: 4px; text-align: center; padding: 6px 0; font-family: var(--font-data); font-weight: 600; font-size: 0.95rem; }
+.row b { display: block; font-weight: 600; font-size: 0.93rem; line-height: 1.25; }
+.row small { color: var(--muted); font-size: 0.78rem; }
+.row .asth { font-size: 0.75rem; color: var(--muted); text-align: right; line-height: 1.25; }
+.row .asth b { font-family: var(--font-data); font-size: 1rem; color: var(--fg); }
+
+.detail { display: flex; flex-direction: column; }
+.d-head { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--line); }
+.d-head h2 { font-size: 1.5rem; }
+.d-head p { color: var(--muted); font-size: 0.88rem; margin-top: 2px; }
+.d-aqi { display: flex; align-items: center; gap: 12px; }
+.d-aqi .chip { font-size: 1.8rem; padding: 8px 16px; font-family: var(--font-display); font-weight: 800; }
+.d-aqi div { font-size: 0.8rem; color: var(--muted); line-height: 1.3; }
+.d-aqi div b { display: block; color: var(--fg); font-size: 1rem; font-family: var(--font-display); }
+.d-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+.sect { padding: 16px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.sect:last-child { border-bottom: 0; }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cols .sect:first-child { border-right: 1px solid var(--line); }
+.best { font-size: 0.9rem; }
+.best b { font-family: var(--font-data); }
+svg.chart { width: 100%; height: auto; display: block; }
+.chart text { font-family: var(--font-data); font-size: 11px; fill: var(--muted); }
+.chart .now { fill: var(--fg); font-weight: 600; }
+.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.checks label { display: flex; gap: 10px; align-items: flex-start; padding: 6px 4px; cursor: pointer; font-size: 0.92rem; }
+.checks input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
+.checks input:checked + span { color: var(--muted); text-decoration: line-through; }
+.stat { display: flex; align-items: baseline; gap: 10px; }
+.stat b { font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; line-height: 1; }
+.stat span { color: var(--muted); font-size: 0.88rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px; }
+textarea { width: 100%; min-height: 128px; resize: vertical; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; font: inherit; font-size: 0.9rem; line-height: 1.5; }
+.btn { background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 4px; padding: 9px 16px; font-weight: 600; align-self: flex-start; }
+.btn:hover { filter: brightness(1.08); }
+.btn-row { display: flex; align-items: center; gap: 12px; }
+.btn-row span { color: var(--muted); font-size: 0.85rem; }
+
+/* outlook */
+.outlook { display: flex; flex-direction: column; gap: 14px; }
+.days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.day .col { height: 90px; display: flex; align-items: flex-end; }
+.day .col i { display: block; width: 100%; background: var(--c); border-radius: 3px 3px 0 0; }
+.day .v { font-family: var(--font-data); font-weight: 600; font-size: 1.1rem; }
+.day .d { font-weight: 600; font-size: 0.88rem; }
+.day small { color: var(--muted); font-size: 0.78rem; line-height: 1.3; }
+
+/* map */
+.mapwrap { display: grid; grid-template-columns: minmax(0, 1fr) 280px; overflow: hidden; }
+.mapwrap .side { border-left: 1px solid var(--line); display: flex; flex-direction: column; min-width: 0; }
+.mapwrap .side .pad { padding: 16px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--line); }
+.mapwrap .side p { color: var(--muted); font-size: 0.85rem; }
+.mapbox { min-width: 0; background: var(--bg); }
+svg.map { width: 100%; height: auto; display: block; }
+.map text { font-family: var(--font-data); font-size: 11px; fill: var(--muted); }
+.map .zone { font-family: var(--font-body); font-size: 12px; font-weight: 500; fill: var(--fg); }
+.map .gl { stroke: var(--line); stroke-opacity: 0.55; stroke-width: 1; }
+.map .river { fill: none; stroke: var(--accent); stroke-opacity: 0.5; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.map .smoke { fill: var(--lv-poor); fill-opacity: 0.13; }
+.map .wind { stroke: var(--lv-poor); stroke-width: 2; }
+.map .windhead { fill: var(--lv-poor); }
+.map .dotg { cursor: pointer; }
+.map .dotg .d { fill: var(--c); stroke: var(--bg); stroke-width: 2; }
+.map .dotg:hover .d { stroke: var(--fg); }
+.map .dotg:focus-visible { outline: none; }
+.map .dotg:focus-visible .d { stroke: var(--fg); stroke-width: 3; }
+.map .sel { fill: none; stroke: var(--fg); stroke-width: 2; }
+.map .v { fill: var(--on); font-weight: 600; font-size: 11px; }
+
+/* alerts */
+.alert { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); }
+.alert .ctrl { padding: 16px; display: flex; flex-direction: column; gap: 18px; border-right: 1px solid var(--line); min-width: 0; }
+.alert .prev { padding: 16px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; min-width: 0; }
+.alert fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.alert legend { padding: 0; margin-bottom: 8px; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt { position: relative; }
+.opt input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.opt span { display: block; border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px; font-size: 0.88rem; background: var(--bg); }
+.opt small { display: block; font-family: var(--font-data); font-size: 0.72rem; opacity: 0.75; }
+.opt input:checked + span { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.opt input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { color: var(--muted); font-size: 0.85rem; }
+.phone { width: 100%; max-width: 310px; border: 1px solid var(--line); border-radius: 24px; padding: 16px 14px; background: var(--bg); display: flex; flex-direction: column; gap: 10px; }
+.ph-top { display: flex; justify-content: space-between; gap: 8px; font-size: 0.74rem; color: var(--muted); }
+.bubble { background: var(--surface-2); border-radius: 14px 14px 14px 4px; padding: 10px 12px; font-size: 0.9rem; line-height: 1.45; overflow-wrap: anywhere; }
+.phone small { color: var(--muted); font-size: 0.75rem; font-family: var(--font-data); }
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.86rem; min-height: 1px; }
+.log li { display: flex; gap: 10px; align-items: flex-start; }
+.log li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--lv-good); margin-top: 7px; flex: none; }
+
+/* pitch */
+.pitch-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.clock { font-family: var(--font-data); font-size: 1.5rem; font-weight: 600; min-width: 4ch; }
+.beats { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.beat { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 16px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.beat:last-child { border-bottom: 0; }
+.beat.on { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--fg); }
+.beat .tm { font-family: var(--font-data); font-size: 0.85rem; color: var(--muted); }
+.beat h3 { font-family: var(--font-display); font-size: 1.05rem; margin-bottom: 6px; }
+.beat p { font-size: 0.92rem; margin-bottom: 4px; }
+.beat p b { font-size: 0.7rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-right: 8px; }
+.qa { border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.qa details { border-bottom: 1px solid var(--line); padding: 12px 16px; }
+.qa details:last-child { border-bottom: 0; }
+.qa summary { cursor: pointer; font-weight: 600; font-size: 0.93rem; }
+.qa details p { margin-top: 8px; color: var(--muted); font-size: 0.9rem; max-width: 70ch; }
+.note-box { border: 1px dashed var(--line); border-radius: 6px; padding: 12px 16px; color: var(--muted); font-size: 0.86rem; }
+.meta a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media (max-width: 920px) {
+  .mapwrap { grid-template-columns: minmax(0, 1fr); }
+  .mapwrap .side { border-left: 0; border-top: 1px solid var(--line); }
+  .alert { grid-template-columns: minmax(0, 1fr); }
+  .alert .ctrl { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 640px) {
+  .beat { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+}
+
+/* season */
+.season { padding: 16px; display: flex; flex-direction: column; gap: 20px; }
+.yh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-bottom: 8px; }
+.yh b { font-family: var(--font-display); font-size: 1.25rem; }
+.yh span { color: var(--muted); font-size: 0.88rem; }
+.sscroll { overflow-x: auto; }
+.strip { display: grid; grid-template-columns: repeat(92, minmax(4px, 1fr)); gap: 2px; min-width: 440px; }
+.strip i { display: block; height: 36px; background: var(--c); border-radius: 2px; }
+.strip i.we { opacity: 0.35; }
+.months { position: relative; height: 18px; min-width: 440px; font-family: var(--font-data); font-size: 0.72rem; color: var(--muted); }
+.months span { position: absolute; top: 2px; }
+.season .note { color: var(--muted); font-size: 0.82rem; max-width: 78ch; }
+
+/* stack */
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; list-style: none; padding: 0; margin: 0; }
+.flow li { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; position: relative; min-width: 0; }
+.flow li:not(:last-child)::after { content: "→"; position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: var(--bg); color: var(--muted); font-size: 0.85rem; line-height: 1; z-index: 1; width: 10px; text-align: center; }
+.flow b { display: block; font-family: var(--font-display); font-size: 1rem; }
+.flow small { color: var(--muted); display: block; margin-top: 4px; font-size: 0.8rem; line-height: 1.35; }
+.foot { color: var(--muted); font-size: 0.82rem; max-width: 80ch; }
+
+@media (max-width: 920px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .work { grid-template-columns: minmax(0, 1fr); }
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow li:not(:last-child)::after { display: none; }
+}
+@media (max-width: 640px) {
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .cols .sect:first-child { border-right: 0; border-bottom: 1px solid var(--line); }
+  .days { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+  .verdict { flex-direction: column; }
+  .bignum { align-self: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><b>Saans</b><span>School air desk · helping every class breathe easier</span></div>
+    <div class="meta"><span id="today"></span><a href="#map">Map</a><a href="#season">Last winter</a><a href="#alerts">Alerts</a><a href="#pitch">Pitch</a><span class="pill" id="status">Sample data while live readings load</span></div>
+  </header>
+
+  <section class="hero" id="hero" aria-live="polite"></section>
+
+  <section class="outlook" id="map">
+    <div>
+      <h2>School air across Delhi</h2>
+      <p class="foot" style="margin-top:4px">Schematic, not to scale. Colour shows estimated school-hour air band. Dot size is decorative in this prototype and does not represent health data. Click a school to open it.</p>
+    </div>
+    <div class="panel mapwrap" id="mapwrap"></div>
+  </section>
+
+  <section class="work">
+    <div class="panel">
+      <div class="panel-h"><h2>Choose a school</h2><span class="label">Estimated AQI, school hours</span></div>
+      <div class="rows" id="rows"></div>
+    </div>
+    <div class="panel detail" id="detail" aria-live="polite"></div>
+  </section>
+
+  <section class="outlook" id="alerts">
+    <div>
+      <h2>Preview a parent alert</h2>
+      <p class="foot" style="margin-top:4px">Draft only: choose a sample audience, timing and language. Nothing is sent.</p>
+    </div>
+    <div class="panel alert" id="alertPanel"></div>
+  </section>
+
+  <section class="outlook">
+    <div>
+      <h2>Five-day air outlook</h2>
+      <p class="foot" id="daysnote" style="margin-top:4px">District-wide school-hour AQI forecast. Use the simple label on each day to plan outdoor classes and parent updates.</p>
+    </div>
+    <div class="days" id="days"></div>
+  </section>
+
+  <section class="outlook" id="season">
+    <div>
+      <h2>Past seasons · model estimate</h2>
+      <p class="foot" style="margin-top:4px">Each square is one day from 1 October to 31 December. Colour represents an estimated school-hour PM2.5-based AQI; weekends are faded.</p>
+    </div>
+    <div class="panel season" id="seasonpanel"></div>
+  </section>
+
+  <section class="outlook" id="pitch">
+    <div>
+      <h2>Three-minute demo script</h2>
+      <p class="foot" style="margin-top:4px">Run it against the page above. Start the timer to see which part you should be on.</p>
+    </div>
+    <div class="pitch-bar">
+      <button class="btn" id="clockBtn" type="button">Start 3-minute run</button>
+      <span class="clock" id="clock" aria-live="off">0:00</span>
+    </div>
+    <ol class="beats" id="beats"></ol>
+    <div>
+      <h2 style="font-size:1.1rem">Questions judges will ask</h2>
+    </div>
+    <div class="qa" id="qa"></div>
+    <p class="note-box">Pitch honestly: school names and locations are real, but enrollment figures are placeholders, asthma numbers are a population-level estimate, and the prototype AQI is based on hourly PM2.5 only. Verify today’s CAQM/GRAP order before describing closure rules.</p>
+  </section>
+
+  <section class="outlook">
+    <div>
+      <h2>How it works (simple roadmap)</h2>
+      <p class="foot" style="margin-top:4px">Now: browser dashboard + live forecast. Next: verify station data and add real school enrolment. Later: alerts only after a school pilot and consent process.</p>
+    </div>
+    <ol class="flow">
+      <li><b>1 · Air data</b><small>Open-Meteo CAMS forecast; OpenAQ measurements are optional. NASA FIRMS fire data is a future addition.</small></li>
+      <li><b>2 · Match schools</b><small>Optional AWS Lambda finds nearby OpenAQ stations. API key stays server-side.</small></li>
+      <li><b>3 · Prepare result</b><small>API Gateway serves station readings; page estimates a PM2.5-based AQI and action band.</small></li>
+      <li><b>4 · School plan</b><small>This static HTML, CSS and JavaScript page shows school-level trends, actions and a parent-message draft.</small></li>
+      <li><b>5 · Pilot carefully</b><small>Amplify can host it. Test accuracy and school workflows before considering real SMS.</small></li>
+    </ol>
+  </section>
+
+  <p class="foot" id="footnote">Read this dashboard: the large number shows schools above the prototype indoor-action threshold. Select a school for its hourly chart and checklist. AQI bands follow Indian CPCB bands but are estimated here from hourly PM2.5 only. While live readings load, air readings and the five-day outlook shown are sample values. Schools come from the Delhi Directorate of Education list. Enrolment is a placeholder and asthma counts are estimated at 7.9% of enrolment.</p>
+</div>
+
+<script>
+(function () {
+  var LV = [
+    { k: 'good', max: 50, name: 'Good', dec: 'Normal day' },
+    { k: 'sat', max: 100, name: 'Satisfactory', dec: 'Normal day' },
+    { k: 'mod', max: 200, name: 'Moderate', dec: 'Limit exertion' },
+    { k: 'poor', max: 300, name: 'Poor', dec: 'Indoor-only day' },
+    { k: 'vpoor', max: 400, name: 'Very poor', dec: 'Indoor-only, shorter day' },
+    { k: 'sev', max: Infinity, name: 'Severe', dec: 'Home learning' }
+  ];
+  var BP = [[0,30,0,50],[30,60,50,100],[60,90,100,200],[90,120,200,300],[120,250,300,400],[250,380,400,500]];
+  function aqi(pm) { for (var i = 0; i < BP.length; i++) { var b = BP[i]; if (pm <= b[1]) return Math.round(b[2] + (b[3] - b[2]) * (pm - b[0]) / (b[1] - b[0])); } return 500; }
+  function level(a) { for (var i = 0; i < LV.length; i++) if (a <= LV[i].max) return LV[i]; return LV[5]; }
+
+  var F = [1.15,1.2,1.2,1.15,1.1,1.05,1.1,1.25,1.3,1.2,1.0,0.85,0.75,0.7,0.7,0.75,0.85,1.0,1.15,1.25,1.3,1.3,1.25,1.2];
+  var S0 = 8, S1 = 14; // school hours 8:00 to 14:00
+  var usingSample = true;
+
+  var ACT = {
+    good: ['Run the normal timetable', 'Keep windows open for ventilation'],
+    sat: ['Run the normal timetable', 'Ask asthma-flagged students to carry inhalers', 'Keep windows open between classes'],
+    mod: ['Keep PT and sports to light activity', 'Keep asthma-flagged students out of running games', 'Close windows facing the road at drop-off and pickup', 'Share the cleanest outdoor window with teachers'],
+    poor: ['Move PT, assembly and sports indoors', 'Keep windows closed from 8 to 10 am', 'Give asthma-flagged students an indoor activity', 'Run purifiers, or wet-mop classrooms, before first bell', 'Send the parent message before 7 am'],
+    vpoor: ['Cancel all outdoor activity, including breaks', 'Offer N95 masks to asthma-flagged students', 'Stagger drop-off to avoid the 8 to 10 am peak', 'Consider ending the day after lunch', 'Send the parent message the evening before'],
+    sev: ['Switch to home learning for the day', 'Tell parents by 6 pm the evening before', 'Keep one staffed indoor room open for children who cannot stay home', 'Check AQI at 5 pm before announcing reopening']
+  };
+  var NOTE = {
+    good: 'Normal activities continue.',
+    sat: 'Normal activities continue.',
+    mod: 'Sports will be kept light and children with breathing trouble will rest during games.',
+    poor: 'All sports, PT and assembly will be held indoors, and windows stay closed during peak hours.',
+    vpoor: 'All activity will be indoors, masks are available for sensitive children, and the school day may end early.',
+    sev: 'Classes move to home learning today. A staffed room stays open for children who cannot stay home.'
+  };
+
+  var SCHOOLS = [
+    { id: 's1', name: "Anand Vihar - SBV", zone: "Anand Vihar", udise: '07040122505', level: "Sarvodaya Sr.Secondary", lat: 28.6525, lon: 77.3163, kids: 620, asthma: 49, pm: 140, seed: 1.3 },
+    { id: 's2', name: "Rohini, Sector 6-SV", zone: "Rohini", udise: '07010102206', level: "Sarvodaya Sr.Secondary", lat: 28.7103, lon: 77.1122, kids: 880, asthma: 70, pm: 98, seed: 2.2 },
+    { id: 's3', name: "Shalimar Bagh, Block AP-GBSSS", zone: "Wazirpur", udise: '07010105604', level: "Sr.Secondary", lat: 28.7014, lon: 77.1587, kids: 1040, asthma: 82, pm: 118, seed: 3.1 },
+    { id: 's4', name: "Mayur Vihar, Phase I, Pkt.IV-SKV", zone: "Mayur Vihar", udise: '07040122001', level: "Sarvodaya Sr.Secondary", lat: 28.6028, lon: 77.2946, kids: 760, asthma: 60, pm: 112, seed: 4.0 },
+    { id: 's5', name: "Tekhand - GGSSS", zone: "Okhla", udise: '07090119901', level: "Sr.Secondary", lat: 28.5247, lon: 77.2838, kids: 930, asthma: 73, pm: 104, seed: 4.9 },
+    { id: 's6', name: "Punjabi Bagh, No.2-SKV", zone: "Punjabi Bagh", udise: '07070110301', level: "Sarvodaya Sr.Secondary", lat: 28.6697, lon: 77.1312, kids: 710, asthma: 56, pm: 88, seed: 5.8 },
+    { id: 's7', name: "R.K. Puram,Sector-13 G(Co-ed)SV", zone: "R K Puram", udise: '07080116708', level: "Sarvodaya Sr.Secondary", lat: 28.5723, lon: 77.1835, kids: 1180, asthma: 93, pm: 76, seed: 6.7 },
+    { id: 's8', name: "Dr. B. R. Ambedkar CM SHRI School, Sec-5, Dwarka", zone: "Dwarka", udise: '07080113611', level: "CM SHRI School (VI-XII)(Sr.Secondary)", lat: 28.5967, lon: 77.0531, kids: 540, asthma: 43, pm: 70, seed: 7.6 },
+    { id: 's9', name: "VASANT KUNJ- GBSSS", zone: "Vasant Kunj", udise: '07090116404', level: "Sr.Secondary", lat: 28.5215, lon: 77.1621, kids: 990, asthma: 78, pm: 58, seed: 8.5 },
+    { id: 's10', name: "Jor Bagh-SV", zone: "Lodhi Road", udise: '070901ND604', level: "Sarvodaya Sr.Secondary", lat: 28.5881, lon: 77.2190, kids: 860, asthma: 68, pm: 46, seed: 9.4 },
+    { id: 's11', name: "Narela, Pocket 5 &amp; 6-GGSSS", zone: "Narela", udise: '07010100107', level: "Sr.Secondary", lat: 28.8482, lon: 77.0940, kids: 1210, asthma: 96, pm: 130, seed: 10.3 },
+    { id: 's12', name: "Jahangirpuri, Block A- SBV", zone: "Jahangirpuri", udise: '07010101501', level: "Sarvodaya Sr.Secondary", lat: 28.7280, lon: 77.1663, kids: 950, asthma: 75, pm: 124, seed: 11.2 }
+  ];
+  function derive(s) {
+    var win = s.hours.slice(S0, S1);
+    s.mean = Math.round(win.reduce(function (a, b) { return a + b; }, 0) / win.length);
+    s.peak = Math.max.apply(null, win);
+    s.lv = level(s.mean);
+    var best = { start: S0, avg: Infinity };
+    for (var h = S0; h <= S1 - 2; h++) {
+      var a = (s.hours[h] + s.hours[h + 1]) / 2;
+      if (a < best.avg) best = { start: h, avg: Math.round(a) };
+    }
+    s.best = best;
+  }
+  SCHOOLS.forEach(function (s) {
+    s.hours = F.map(function (f, h) { return aqi(s.pm * f * (1 + 0.06 * Math.sin((h + 1) * s.seed))); });
+    derive(s);
+  });
+  SCHOOLS.sort(function (a, b) { return b.mean - a.mean; });
+
+  var selected = SCHOOLS[0].id;
+  var done = {};
+  var now = new Date();
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function hr(h) { return pad(h) + ':00'; }
+
+  $('today').textContent = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  /* hero */
+  function renderHero() {
+    var indoor = SCHOOLS.filter(function (s) { return s.mean > 200; });
+    var med = Math.round(median(SCHOOLS.map(function (s) { return s.mean; })));
+    var cityLv = indoor.length * 2 >= SCHOOLS.length ? level(300) : level(med);
+    var kids = indoor.reduce(function (a, s) { return a + s.kids; }, 0);
+    var asth = indoor.reduce(function (a, s) { return a + s.asthma; }, 0);
+    var counts = {};
+    LV.forEach(function (l) { counts[l.k] = 0; });
+    SCHOOLS.forEach(function (s) { counts[s.lv.k]++; });
+    var bar = LV.filter(function (l) { return counts[l.k] > 0; }).map(function (l) {
+      return '<i class="lv-' + l.k + '" style="flex:' + counts[l.k] + '" title="' + l.name + '">' + counts[l.k] + '</i>';
+    }).join('');
+    var leg = LV.map(function (l) { return '<span class="lv-' + l.k + '"><i></i>' + l.name + '</span>'; }).join('');
+    $('hero').innerHTML =
+      '<div class="verdict lv-' + cityLv.k + '">' +
+        '<div class="bignum">' + indoor.length + '</div>' +
+        '<div><h1>of ' + SCHOOLS.length + ' schools cross the prototype indoor-action line today.</h1>' +
+        '<p class="sample-note">' + (usingSample ? 'Illustrative sample values · live forecast may not have loaded yet' : 'Live forecast · hourly PM2.5 converted to an estimated AQI') + '</p>' +
+        '<p>' + (indoor.length ? 'Placeholder enrolment total: ' + kids.toLocaleString('en-IN') + '. Population-level asthma planning estimate: ' + asth + ' (7.9% proxy, not school records). ' : 'Every school is below the prototype indoor-action line. ') + 'Median school-hour AQI estimate is <b class="mono">' + med + '</b>.</p></div>' +
+      '</div>' +
+      '<div class="dist"><span class="label">Schools by estimated AQI band</span><div class="bar">' + bar + '</div><div class="legend">' + leg + '</div></div>';
+  }
+
+  /* list */
+  function renderRows() {
+    $('rows').innerHTML = SCHOOLS.map(function (s) {
+      return '<button class="row lv-' + s.lv.k + '" data-id="' + s.id + '" aria-pressed="' + (s.id === selected) + '">' +
+        '<span class="chip">' + s.mean + '</span>' +
+        '<span><b>' + s.name + '</b><small>' + s.zone + ' · ' + s.lv.dec + '</small></span>' +
+        '<span class="asth"><b>' + s.lv.name + '</b><br>estimated band</span></button>';
+    }).join('');
+  }
+
+  /* chart */
+  function chart(s) {
+    var W = 640, H = 240, L = 34, R = 10, T = 12, B = 28;
+    var ymax = Math.max(400, Math.ceil(Math.max.apply(null, s.hours) / 100) * 100);
+    var x = function (h) { return L + (W - L - R) * h / 23; };
+    var y = function (v) { return T + (H - T - B) * (1 - v / ymax); };
+    var edges = [0, 50, 100, 200, 300, 400, 500];
+    var keys = ['good', 'sat', 'mod', 'poor', 'vpoor', 'sev'];
+    var out = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Hourly AQI for ' + s.zone + '">';
+    for (var i = 0; i < 6; i++) {
+      var lo = edges[i], hi = Math.min(edges[i + 1], ymax);
+      if (lo >= ymax) break;
+      out += '<rect x="' + L + '" y="' + y(hi) + '" width="' + (W - L - R) + '" height="' + (y(lo) - y(hi)) + '" fill="var(--lv-' + keys[i] + ')" fill-opacity="0.16"/>';
+    }
+    out += '<rect x="' + x(S0) + '" y="' + T + '" width="' + (x(S1) - x(S0)) + '" height="' + (H - T - B) + '" fill="var(--fg)" fill-opacity="0.07"/>';
+    out += '<text x="' + (x(S0) + 4) + '" y="' + (T + 11) + '">school hours</text>';
+    [100, 200, 300, 400].forEach(function (v) {
+      if (v < ymax) {
+        out += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="var(--line)" stroke-width="1"/>';
+        out += '<text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v + '</text>';
+      }
+    });
+    out += '<text x="' + (L - 6) + '" y="' + (y(0) + 4) + '" text-anchor="end">0</text>';
+    for (var h = 0; h < 24; h += 3) out += '<text x="' + x(h) + '" y="' + (H - 8) + '" text-anchor="middle">' + pad(h) + '</text>';
+    var pts = s.hours.map(function (v, h) { return x(h) + ',' + y(v); });
+    var ln = 'fill="none" stroke="var(--fg)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"';
+    if (s.live) {
+      var nh = now.getHours();
+      out += '<polyline points="' + pts.slice(0, nh + 1).join(' ') + '" ' + ln + '/>';
+      out += '<polyline points="' + pts.slice(nh).join(' ') + '" ' + ln + ' stroke-dasharray="5 4" stroke-opacity="0.8"/>';
+    } else {
+      out += '<polyline points="' + pts.join(' ') + '" ' + ln + '/>';
+    }
+    out += '<polyline points="' + pts.slice(s.best.start, s.best.start + 2).join(' ') + '" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round"/>';
+    var ch = now.getHours();
+    out += '<line x1="' + x(ch) + '" x2="' + x(ch) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--fg)" stroke-width="1" stroke-dasharray="3 3"/>';
+    out += '<circle cx="' + x(ch) + '" cy="' + y(s.hours[ch]) + '" r="4.5" fill="var(--fg)"/>';
+    var anchor = ch > 19 ? 'end' : 'start', dx = ch > 19 ? -7 : 7;
+    out += '<text class="now" x="' + (x(ch) + dx) + '" y="' + (y(s.hours[ch]) - 8) + '" text-anchor="' + anchor + '">now ' + s.hours[ch] + '</text>';
+    return out + '</svg>';
+  }
+
+  function message(s) {
+    return 'DEMO DRAFT — Dear parents, estimated air around ' + s.name + ' may be ' + s.lv.name.toLowerCase() +
+      ' (hourly PM2.5-only AQI estimate about ' + s.mean + ') during school hours. ' + NOTE[s.lv.k] +
+      ' This is an estimate, not an official closure notice. Follow school-approved guidance. No message will be sent.';
+  }
+
+  function renderDetail() {
+    var s = SCHOOLS.filter(function (z) { return z.id === selected; })[0];
+    var pct = 7.9;
+    var bestTxt = hr(s.best.start) + ' to ' + hr(s.best.start + 2);
+    var bestLv = level(s.best.avg);
+    var bestNote = bestLv.max > 200 ? ' Still ' + bestLv.name.toLowerCase() + ', so keep it light or indoors.' : ' Schedule PT and assembly here.';
+    var acts = ACT[s.lv.k].map(function (t, i) {
+      var key = s.id + i;
+      return '<li><label><input type="checkbox" data-k="' + key + '"' + (done[key] ? ' checked' : '') + '><span>' + t + '</span></label></li>';
+    }).join('');
+    var tags = '';
+    tags += '<span class="pill">' + s.level + '</span>';
+    tags += '<span class="pill">Population estimate only · no student records</span>';
+    $('detail').innerHTML =
+      '<div class="d-head lv-' + s.lv.k + '"><div><h2>' + s.name + '</h2><p>' + s.zone + ' · UDISE ' + s.udise + ' · enrolment ' + s.kids.toLocaleString('en-IN') + ' (placeholder)</p>' + (s.src ? '<p>Air data: ' + s.src + '</p>' : '') + '</div>' +
+        '<div class="d-aqi"><span class="chip">' + s.mean + '</span><div><b>' + s.lv.dec + '</b>' + s.lv.name + ' during school hours, peak ' + s.peak + '</div></div></div>' +
+      '<div class="d-body">' +
+        '<div class="sect"><span class="label">' + (s.live ? 'Hourly estimated AQI today · dashed line is forecast' : 'Sample hourly AQI shape') + '</span>' + chart(s) +
+          '<p class="best"><b>Lowest estimated 2-hour window: ' + bestTxt + '</b> (estimated AQI ' + s.best.avg + ').' + bestNote + '</p></div>' +
+        '<div class="cols">' +
+          '<div class="sect"><span class="label">Do this today</span><ul class="checks">' + acts + '</ul></div>' +
+          '<div class="sect"><span class="label">Population planning estimate</span>' +
+            '<div class="stat"><b>' + s.asthma + '</b><span>estimated from population prevalence (' + pct + '%); not a school record</span></div>' +
+            '<div class="facts">' + tags + '</div>' +
+            '<p style="color:var(--muted);font-size:0.88rem">Use school-approved confidential support plans. This prototype identifies no individual students.</p></div>' +
+        '</div>' +
+        '<div class="sect"><span class="label">Message to parents</span>' +
+          '<textarea id="msg" aria-label="Message to parents">' + message(s) + '</textarea>' +
+          '<div class="btn-row"><button class="btn" id="copy" type="button">Copy message</button><span id="copied" aria-live="polite"></span></div></div>' +
+      '</div>';
+  }
+
+  /* outlook */
+  function renderDays() {
+    var vals = [null, 238, 271, 296, 224];
+        vals[0] = Math.round(median(SCHOOLS.map(function (s) { return s.mean; })));
+    if (live.days) { vals = live.days.slice(); }
+    var html = '';
+    for (var i = 0; i < 5; i++) {
+      var d = new Date(now.getTime() + i * 86400000);
+      var l = level(vals[i]);
+      var name = i === 0 ? 'Today' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+      html += '<div class="day lv-' + l.k + '"><div class="col"><i style="height:' + Math.round(100 * Math.min(vals[i], 400) / 400) + '%"></i></div>' +
+        '<span class="v">' + vals[i] + '</span><span class="d">' + name + '</span><small>' + l.dec + '</small></div>';
+    }
+    $('days').innerHTML = html;
+  }
+
+  function cur() { return SCHOOLS.filter(function (z) { return z.id === selected; })[0]; }
+  function select(id) {
+    selected = id;
+    alertState.when = null;
+    renderRows(); renderDetail(); renderMap(); renderAlert();
+  }
+
+  /* ---------- map ---------- */
+  var LATMIN = Math.min.apply(null, SCHOOLS.map(function (s) { return s.lat; })) - 0.03;
+  var LATMAX = Math.max.apply(null, SCHOOLS.map(function (s) { return s.lat; })) + 0.03;
+  var LONMIN = Math.min.apply(null, SCHOOLS.map(function (s) { return s.lon; })) - 0.03;
+  var LONMAX = Math.max.apply(null, SCHOOLS.map(function (s) { return s.lon; })) + 0.03;
+  var KX = Math.cos(28.65 * Math.PI / 180);
+  var SPANX = (LONMAX - LONMIN) * KX, SPANY = LATMAX - LATMIN;
+  var SC = Math.min(440 / SPANX, 420 / SPANY);
+  var OX = 40 + (440 - SPANX * SC) / 2, OY = 30 + (420 - SPANY * SC) / 2;
+  function mapX(lon) { return OX + (lon - LONMIN) * KX * SC; }
+  function mapY(lat) { return OY + (LATMAX - lat) * SC; }
+  function median(a) {
+    var m = a.slice().sort(function (x, y) { return x - y; }), n = m.length;
+    return n % 2 ? m[(n - 1) / 2] : (m[n / 2 - 1] + m[n / 2]) / 2;
+  }
+
+  function renderMap() {
+    var out = '<svg class="map" viewBox="0 0 520 480" role="img" aria-label="Schematic map of schools coloured by AQI">';
+    for (var g = 1; g < 5; g++) out += '<line class="gl" x1="' + (g * 104) + '" x2="' + (g * 104) + '" y1="0" y2="480"/>';
+    for (var h = 1; h < 5; h++) out += '<line class="gl" x1="0" x2="520" y1="' + (h * 96) + '" y2="' + (h * 96) + '"/>';
+    out += '<ellipse class="smoke" cx="130" cy="85" rx="190" ry="85" transform="rotate(28 130 85)"/>';
+    var river = [[28.78, 77.22], [28.70, 77.24], [28.65, 77.25], [28.60, 77.26], [28.55, 77.29], [28.46, 77.31]].map(function (p) {
+      return mapX(p[1]).toFixed(1) + ',' + mapY(p[0]).toFixed(1);
+    }).join(' ');
+    out += '<polyline class="river" points="' + river + '"/>';
+    out += '<text x="' + (mapX(77.245) + 8).toFixed(1) + '" y="' + (mapY(28.70)).toFixed(1) + '">Yamuna, approx.</text>';
+    out += '<line class="wind" x1="44" y1="42" x2="186" y2="119"/><polygon class="windhead" points="194,123 180.6,121.3 186.4,110.9"/>';
+    out += '<text x="44" y="30">Smoke drift from the north-west (sample)</text>';
+    var P = SCHOOLS.map(function (s) { return { s: s, x: mapX(s.lon), y: mapY(s.lat), r: 11 }; });
+    var placed = [];
+    P.forEach(function (p) {
+      var w = p.s.zone.length * 6.6 + 4;
+      var opts = [
+        { m: 'r', x0: p.x + p.r + 6, y0: p.y - 8, ax: p.x + p.r + 6, an: 'start' },
+        { m: 'l', x0: p.x - p.r - 6 - w, y0: p.y - 8, ax: p.x - p.r - 6, an: 'end' },
+        { m: 'a', x0: p.x - w / 2, y0: p.y - p.r - 19, ax: p.x, an: 'middle' },
+        { m: 'b', x0: p.x - w / 2, y0: p.y + p.r + 4, ax: p.x, an: 'middle' }
+      ];
+      var pick = opts[0];
+      for (var k = 0; k < opts.length; k++) {
+        var o = opts[k], hit = false;
+        if (o.x0 < 4 || o.x0 + w > 516 || o.y0 < 2 || o.y0 + 16 > 478) hit = true;
+        P.forEach(function (q) { if (q !== p && o.x0 < q.x + q.r + 2 && o.x0 + w > q.x - q.r - 2 && o.y0 < q.y + q.r + 2 && o.y0 + 16 > q.y - q.r - 2) hit = true; });
+        if (o.m === 'a' || o.m === 'b') { if (o.x0 < p.x + p.r && o.x0 + w > p.x - p.r && o.y0 < p.y + p.r && o.y0 + 16 > p.y - p.r) hit = true; }
+        placed.forEach(function (b) { if (o.x0 < b.x + b.w && o.x0 + w > b.x && o.y0 < b.y + 16 && o.y0 + 16 > b.y) hit = true; });
+        if (!hit) { pick = o; break; }
+      }
+      p.tx = pick.ax; p.ty = pick.y0 + 12; p.an = pick.an;
+      placed.push({ x: pick.x0, y: pick.y0, w: w });
+    });
+    P.forEach(function (p) {
+      var s = p.s, x = p.x, y = p.y, r = p.r;
+      out += '<g class="dotg lv-' + s.lv.k + '" data-id="' + s.id + '" tabindex="0" role="button" aria-label="' + s.name + ', estimated AQI ' + s.mean + ', ' + s.lv.name + '">';
+      if (s.id === selected) out += '<circle class="sel" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (r + 5).toFixed(1) + '"/>';
+      out += '<circle class="d" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(1) + '"/>';
+      out += '<text class="v" x="' + x.toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="middle">' + s.mean + '</text>';
+      out += '<text class="zone" x="' + p.tx.toFixed(1) + '" y="' + p.ty.toFixed(1) + '" text-anchor="' + p.an + '">' + s.zone + '</text>';
+      out += '</g>';
+    });
+    out += '</svg>';
+
+    var first = SCHOOLS.filter(function (s) { return s.mean > 200; }).sort(function (a, b) { return b.mean - a.mean; }).slice(0, 3);
+    var side = '<div class="pad"><span class="label">Schools needing attention</span><p>Prototype ranking by estimated school-hour air band. Counts shown below are planning estimates, not school health records.</p></div><div class="rows">';
+    if (!first.length) side += '<div class="pad"><p>No school is above the indoor-only line today.</p></div>';
+    first.forEach(function (s) {
+      side += '<button class="row lv-' + s.lv.k + '" data-id="' + s.id + '" aria-pressed="' + (s.id === selected) + '"><span class="chip">' + s.mean + '</span><span><b>' + s.zone + '</b><small>' + s.name + '</small></span><span class="asth"><b>' + s.lv.name + '</b><br>estimated band</span></button>';
+    });
+    side += '</div>';
+    $('mapwrap').innerHTML = '<div class="mapbox">' + out + '</div><div class="side">' + side + '</div>';
+  }
+
+  /* ---------- alerts ---------- */
+  var alertState = { aud: 'all', when: null, lang: 'en' };
+  var sendTimers = [];
+  var SHORT = { good: 'School runs as normal', sat: 'School runs as normal', mod: 'Sports will be kept light', poor: 'All sports and assembly move indoors', vpoor: 'All activity is indoors and school may end early', sev: 'Classes move to home learning' };
+  var LVHI = { good: 'अच्छी', sat: 'संतोषजनक', mod: 'मध्यम', poor: 'खराब', vpoor: 'बहुत खराब', sev: 'गंभीर' };
+  var SHORTHI = { good: 'स्कूल सामान्य रहेगा', sat: 'स्कूल सामान्य रहेगा', mod: 'खेल हल्के रखे जाएंगे', poor: 'खेल और सभा कक्षा के अंदर होंगे', vpoor: 'सभी गतिविधियां अंदर होंगी और स्कूल जल्दी छूट सकता है', sev: 'कक्षाएं घर से होंगी' };
+  var WHEN = { now: 'Now', eve: 'Tonight, 6:00 pm', am: 'Tomorrow, 6:30 am' };
+
+  function smsText(s, lang) {
+    if (lang === 'hi') return 'डेमो अनुमान: ' + s.zone + ' में PM2.5 आधारित AQI लगभग ' + s.mean + ' (' + LVHI[s.lv.k] + ')। ' + SHORTHI[s.lv.k] + '। स्कूल की स्वीकृत स्वास्थ्य योजना अपनाएं।';
+    return 'Saans demo: estimated air near ' + s.name + ' is ' + s.lv.name.toLowerCase() + ' (PM2.5-only AQI about ' + s.mean + '). ' + SHORT[s.lv.k] + '. Follow school-approved health plans.';
+  }
+  function smsParts(msg, lang) {
+    var n = msg.length;
+    if (lang === 'hi') return n <= 70 ? 1 : Math.ceil(n / 67);
+    return n <= 160 ? 1 : Math.ceil(n / 153);
+  }
+  function optGroup(name, list, val) {
+    return '<div class="opts">' + list.map(function (o) {
+      return '<label class="opt"><input type="radio" name="' + name + '" value="' + o[0] + '"' + (o[0] === val ? ' checked' : '') + '><span>' + o[1] + (o[2] ? '<small>' + o[2] + '</small>' : '') + '</span></label>';
+    }).join('') + '</div>';
+  }
+
+  function renderAlert() {
+    var s = cur(), st = alertState;
+    sendTimers.forEach(clearTimeout); sendTimers = [];
+    if (!st.when) st.when = s.mean > 200 ? 'eve' : 'am';
+    var counts = { all: Math.round(s.kids * 0.82), asthma: s.asthma, staff: Math.round(s.kids / 30) };
+    var msg = smsText(s, st.lang);
+    var parts = smsParts(msg, st.lang);
+    var n = counts[st.aud];
+    var hint = s.mean > 200 ? 'The mock-up suggests an evening preview; confirm timing with the school.' : 'The mock-up suggests a morning preview; confirm timing with the school.';
+    $('alertPanel').innerHTML =
+      '<div class="ctrl">' +
+        '<fieldset><legend class="label">Who gets it</legend>' + optGroup('aud', [
+          ['all', 'All parents', 'demo count · ' + counts.all.toLocaleString('en-IN')],
+          ['asthma', 'Health-support-plan families', 'demo estimate · ' + counts.asthma],
+          ['staff', 'Teachers and staff', 'demo count · ' + counts.staff]], st.aud) + '</fieldset>' +
+        '<fieldset><legend class="label">When</legend>' + optGroup('when', [['now', WHEN.now], ['eve', WHEN.eve], ['am', WHEN.am]], st.when) + '<p class="hint">' + hint + '</p></fieldset>' +
+        '<fieldset><legend class="label">Language</legend>' + optGroup('lang', [['en', 'English'], ['hi', 'हिन्दी']], st.lang) + '</fieldset>' +
+        '<div class="btn-row"><button class="btn" id="queue" type="button">Preview demo alert</button><span>Demo only. No message leaves this page; recipient counts are placeholders.</span></div>' +
+        '<ul class="log" id="sendlog" aria-live="polite"></ul>' +
+      '</div>' +
+      '<div class="prev"><span class="label">Sample parent-message preview</span>' +
+        '<div class="phone"><div class="ph-top"><span>SAANSK</span><span>' + WHEN[st.when] + '</span></div>' +
+        '<div class="bubble">' + msg + '</div>' +
+        '<small>' + msg.length + ' characters, ' + parts + ' SMS part' + (parts > 1 ? 's' : '') + ' per phone</small></div>' +
+        '<p class="hint">' + s.name + '</p></div>';
+  }
+
+  function runQueue() {
+    var s = cur(), st = alertState, log = $('sendlog');
+    var counts = { all: Math.round(s.kids * 0.82), asthma: s.asthma, staff: Math.round(s.kids / 30) };
+    var n = counts[st.aud];
+    var btn = $('queue');
+    btn.disabled = true;
+    log.innerHTML = '';
+    var steps = [
+      [0, 'Demo queued for ' + WHEN[st.when].toLowerCase()],
+      [900, 'Simulation step: would hand off to an SMS service'],
+      [1900, 'Simulation only: displayed for ' + n.toLocaleString('en-IN') + ' demo recipients; nothing was delivered']
+    ];
+    steps.forEach(function (stp) {
+      sendTimers.push(setTimeout(function () {
+        var li = doc.createElement('li');
+        li.textContent = stp[1];
+        log.appendChild(li);
+      }, stp[0]));
+    });
+    sendTimers.push(setTimeout(function () { btn.disabled = false; btn.textContent = 'Queue again'; }, 2000));
+  }
+
+  /* ---------- pitch ---------- */
+  var BEATS = [
+    { a: 0, b: 20, h: "Open on the verdict", on: "Page loaded on the headline. Point at the big number.",
+      say: "It is 6 am on a smoky October morning. A principal has to decide whether hundreds of children go out for assembly. The headline tells her how many schools in the district cross the prototype indoor-action line today." },
+    { a: 20, b: 45, h: "Name the problem", on: "Stay on the headline and point at the asthma estimate.",
+      say: "City air alerts tell everyone the same thing. They do not tell a school which of its children are most at risk, or when the cleanest hour is. A 2022 AIIMS review of 33 studies puts asthma at about 8 in 100 Indian children, so every school has them." },
+    { a: 45, b: 80, h: "Open the worst school", on: "Click the top school in the list. Point at the hourly chart, the best two hours, and the checklist.",
+      say: "Saans turns the reading into a plan for this school. Here is the hour-by-hour air, the cleanest two hours for PT, and five things to do before first bell." },
+    { a: 80, b: 105, h: "Show the map", on: "Scroll to the map. Click the cleanest school, then the worst.",
+      say: "Same day, schools across the city. Colour shows the estimated school-hour air band. The enrollment counts are placeholders, so this view highlights air exposure only." },
+    { a: 105, b: 130, h: "Show last winter", on: "Scroll to Last winter and point at 2025.",
+      say: "This is the same rule applied to last October to December. On 26 of 66 weekdays in 2025 the school-hour air was above the indoor-only line. These are past days from model data, so station readings on the worst days run higher." },
+    { a: 130, b: 155, h: "Preview the alert", on: "Scroll to the parent alert preview. Choose a demo audience and Hindi, then click Preview demo alert.",
+      say: "The demo drafts a message in Hindi or English. Nothing is actually sent; real notifications need consent, delivery safeguards and school approval." },
+    { a: 155, b: 172, h: "Show how it ships", on: "Scroll to How it ships.",
+      say: "The site is static, so it can sit on Amplify. A small Lambda behind API Gateway fetches station readings with the key kept server-side, and SNS is the next step for real alerts. There is no server to look after." },
+    { a: 172, b: 180, h: "Make the ask", on: "Return to the headline.",
+      say: "The air feed is intended to be live, but check the status indicator. School names and locations are real; enrollment is still placeholder data. Next step is validating a pilot with schools." }
+  ];
+  var QA = [
+    ['Where does the air data come from?', 'Hourly PM2.5 from the CAMS model through Open-Meteo, which gives a forecast for every school. Where an OpenAQ station is within 25 km, its measured readings replace the model for the hours already observed. Fire detections from NASA FIRMS are the next addition.'],
+    ['Why does the AQI use PM2.5 only?', 'The official index takes the worst of several pollutants. This prototype uses PM2.5 alone, and adding PM10 and the others is the next step.'],
+    ['Will schools actually use it?', 'It writes the checklist and the parent message for them, so acting on a bad day takes one click instead of a morning of phone calls.'],
+    ['What does it cost to run?', 'It is built from pay-per-use serverless services with no always-on server, so a small pilot should cost very little. Check this against your own usage before promising a number.'],
+    ['How is this different from an AQI app?', 'An AQI app shows a number for a neighbourhood. Saans decides what a particular school should do, for which students, and tells their parents.']
+  ];
+  function fmt(sec) { return Math.floor(sec / 60) + ':' + pad(sec % 60); }
+  function renderPitch() {
+    $('beats').innerHTML = BEATS.map(function (b) {
+      return '<li class="beat"><div class="tm">' + fmt(b.a) + ' to ' + fmt(b.b) + '</div><div><h3>' + b.h + '</h3><p><b>On screen</b>' + b.on + '</p><p><b>Say</b>' + b.say + '</p></div></li>';
+    }).join('');
+    $('qa').innerHTML = QA.map(function (q) { return '<details><summary>' + q[0] + '</summary><p>' + q[1] + '</p></details>'; }).join('');
+  }
+  var clockTimer = 0, clockStart = 0;
+  function clockTick() {
+    var e = Math.floor((Date.now() - clockStart) / 1000);
+    $('clock').textContent = fmt(Math.min(e, 180));
+    var items = $('beats').children;
+    for (var i = 0; i < items.length; i++) items[i].classList.toggle('on', e >= BEATS[i].a && e < BEATS[i].b);
+    if (e >= 180) stopClock(false);
+  }
+  function stopClock(reset) {
+    clearInterval(clockTimer); clockTimer = 0;
+    $('clockBtn').textContent = 'Start 3-minute run';
+    var items = $('beats').children;
+    for (var i = 0; i < items.length; i++) items[i].classList.remove('on');
+    if (reset) $('clock').textContent = '0:00';
+  }
+  $('clockBtn').addEventListener('click', function () {
+    if (clockTimer) { stopClock(true); return; }
+    clockStart = Date.now();
+    $('clockBtn').textContent = 'Stop and reset';
+    clockTick();
+    clockTimer = setInterval(clockTick, 250);
+  });
+
+  /* events */
+  $('rows').addEventListener('click', function (e) {
+    var b = e.target.closest('.row');
+    if (!b) return;
+    select(b.getAttribute('data-id'));
+  });
+  $('mapwrap').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-id]');
+    if (t) select(t.getAttribute('data-id'));
+  });
+  $('mapwrap').addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var t = e.target.closest('.dotg');
+    if (!t) return;
+    e.preventDefault();
+    select(t.getAttribute('data-id'));
+  });
+  $('alertPanel').addEventListener('change', function (e) {
+    var t = e.target;
+    if (!t.matches('input[type="radio"]')) return;
+    alertState[t.name] = t.value;
+    renderAlert();
+    var again = $('alertPanel').querySelector('input[name="' + t.name + '"][value="' + t.value + '"]');
+    if (again) again.focus();
+  });
+  $('alertPanel').addEventListener('click', function (e) {
+    if (e.target.id === 'queue') runQueue();
+  });
+  $('detail').addEventListener('change', function (e) {
+    if (e.target.matches('input[type="checkbox"]')) done[e.target.getAttribute('data-k')] = e.target.checked;
+  });
+  $('detail').addEventListener('click', function (e) {
+    if (e.target.id !== 'copy') return;
+    var ta = $('msg'), note = $('copied');
+    function ok() { note.textContent = 'Copied'; }
+    function fallback() { ta.focus(); ta.select(); note.textContent = 'Selected, press copy on your keyboard'; }
+    try { navigator.clipboard.writeText(ta.value).then(ok, fallback); } catch (err) { fallback(); }
+  });
+
+  /* ---------- live data ---------- */
+  // After deploying the Lambda, paste its ObservedUrl here to replace the model with station readings.
+  var CONFIG = { observedUrl: '' };
+  var live = { days: null };
+
+  function istToday() { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }); }
+  function fillGaps(a) {
+    var i, last = null;
+    for (i = 0; i < a.length; i++) { if (a[i] != null) last = a[i]; else if (last != null) a[i] = last; }
+    var first = a.filter(function (v) { return v != null; })[0];
+    if (first == null) return null;
+    for (i = 0; i < a.length; i++) { if (a[i] == null) a[i] = first; else break; }
+    return a;
+  }
+  function setStatus(t) { var el = $('status'); if (el) el.textContent = t; }
+
+  function loadForecast() {
+    var lats = [], lons = [], tzs = [];
+    SCHOOLS.forEach(function (s) { lats.push(s.lat); lons.push(s.lon); tzs.push('Asia%2FKolkata'); });
+    var url = 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=' + lats.join(',') + '&longitude=' + lons.join(',') +
+      '&hourly=pm2_5&forecast_days=5&timezone=' + tzs.join(',');
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('forecast ' + r.status);
+      return r.json();
+    }).then(function (j) {
+      var arr = Array.isArray(j) ? j : [j];
+      if (arr.length !== SCHOOLS.length) throw new Error('unexpected forecast shape');
+      var today = istToday();
+      return arr.map(function (loc) {
+        var t = loc.hourly.time, v = loc.hourly.pm2_5;
+        var start = t.indexOf(today + 'T00:00');
+        if (start < 0) throw new Error('today missing from forecast');
+        var days = [];
+        for (var d = 0; d < 5; d++) {
+          var seg = fillGaps(v.slice(start + 24 * d, start + 24 * d + 24));
+          if (!seg || seg.length < 24) {
+            if (d === 0) throw new Error('no data for today');
+            seg = days[d - 1];
+          }
+          days.push(seg);
+        }
+        return days;
+      });
+    });
+  }
+  function applyForecast(all) {
+    usingSample = false;
+    SCHOOLS.forEach(function (s, i) {
+      var days = all[i];
+      s.hours = days[0].map(aqi);
+      s.dayMeans = days.map(function (seg) {
+        var w = seg.slice(S0, S1).map(aqi);
+        return w.reduce(function (a, b) { return a + b; }, 0) / w.length;
+      });
+      s.live = true;
+      s.src = 'modelled forecast (CAMS via Open-Meteo)';
+      derive(s);
+    });
+    var out = [];
+    for (var d = 0; d < 5; d++) {
+      out.push(Math.round(median(SCHOOLS.map(function (s) { return s.dayMeans[d]; }))));
+    }
+    live.days = out;
+  }
+  function loadObserved() {
+    if (!CONFIG.observedUrl) return Promise.resolve(null);
+    return fetch(CONFIG.observedUrl).then(function (r) {
+      if (!r.ok) throw new Error('observed ' + r.status);
+      return r.json();
+    });
+  }
+  function applyObserved(j) {
+    if (!j || !j.schools) return 0;
+    var n = 0;
+    SCHOOLS.forEach(function (s) {
+      var o = j.schools[s.id];
+      if (!o || !o.hours) return;
+      var got = 0;
+      o.hours.forEach(function (v, h) { if (v != null && v >= 0 && h < 24) { s.hours[h] = aqi(v); got++; } });
+      if (got) {
+        s.src = 'station ' + o.station + ', ' + o.distanceKm + ' km away (OpenAQ), forecast for later hours';
+        derive(s);
+        n++;
+      }
+    });
+    return n;
+  }
+  function refreshAll() {
+    SCHOOLS.sort(function (a, b) { return b.mean - a.mean; });
+    alertState.when = null;
+    renderHero(); renderRows(); renderDetail(); renderMap(); renderAlert(); renderDays();
+  }
+  function goLive() {
+    loadForecast().then(function (all) {
+      applyForecast(all);
+      return loadObserved().then(applyObserved, function () { return 0; });
+    }).then(function (n) {
+      refreshAll();
+      var t = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
+      setStatus('Live forecast' + (n ? ' + ' + n + ' stations' : '') + ', updated ' + t);
+      $('footnote').textContent = 'Hourly PM2.5 is a CAMS ENSEMBLE model forecast served by Open-Meteo.com, and OpenAQ station readings replace it where the observed-readings service is switched on. AQI bands follow the Indian CPCB scale and are worked out from hourly PM2.5 only, while the official index uses 24-hour averages and more pollutants. Schools come from the Delhi Directorate of Education list. Enrolment is a placeholder, and asthma counts are estimated at 7.9% of enrolment (Daniel et al., Lung India, 2022).';
+      $('daysnote').textContent = 'Modelled school-hour AQI for the district, from the same forecast. Warn parents the evening before any day marked indoor-only or worse.';
+    }).catch(function () {
+      usingSample = true;
+      setStatus('Sample data (live fetch failed)');
+      renderHero();
+    });
+  }
+
+  var LAST = {"2023":[43.0,33.5,35.7,49.6,56.3,49.4,48.7,43.4,35.9,29.7,41.5,37.6,43.2,44.7,46.4,41.7,41.4,29.4,27.4,28.5,30.1,40.9,43.3,39.8,34.5,32.6,34.8,49.3,82.8,79.8,88.1,88.0,90.2,87.2,103.9,66.8,67.2,82.2,86.8,90.5,86.9,64.0,31.1,37.7,47.6,48.6,76.1,83.7,83.7,102.0,90.9,76.1,76.6,95.2,111.5,70.8,118.1,93.0,90.8,74.1,106.9,95.5,71.6,65.2,66.2,50.5,52.9,66.4,64.3,63.5,71.4,81.3,110.3,103.4,62.4,98.9,71.2,84.3,58.1,56.3,64.1,81.5,96.7,106.9,108.6,96.8,106.5,141.1,109.7,129.7,137.6,103.8],"2024":[52.6,58.2,46.9,31.6,25.2,42.5,40.5,35.7,37.8,32.7,33.9,37.5,47.0,35.5,46.0,50.4,72.8,74.9,78.2,88.2,85.1,87.3,69.4,65.7,64.1,51.8,69.6,82.1,71.6,72.7,69.0,47.3,65.7,82.0,115.1,111.0,133.2,121.1,139.3,112.9,89.4,113.5,126.7,146.0,168.2,119.0,132.1,125.4,97.2,77.0,86.9,91.8,127.9,132.7,52.3,116.6,72.3,74.1,83.6,97.6,80.8,69.0,67.1,54.9,41.0,33.8,46.1,63.0,83.1,69.0,54.2,42.1,68.0,45.8,48.4,70.7,112.3,173.1,122.3,165.7,127.9,127.4,167.0,140.7,105.7,109.6,148.7,113.5,106.2,82.6,73.6,121.9],"2025":[37.5,39.7,29.6,52.9,56.5,40.1,14.0,33.3,29.1,37.4,36.2,51.9,44.1,49.3,51.7,50.0,51.5,62.5,73.2,67.0,72.5,100.9,58.3,64.2,78.6,76.7,78.3,59.9,78.1,74.2,63.2,82.8,82.3,71.6,72.9,80.4,44.6,48.4,46.8,52.9,66.2,79.8,91.4,106.6,76.5,85.0,68.9,81.8,116.8,114.5,148.3,136.2,163.0,168.5,124.8,85.5,98.0,98.6,76.5,56.7,58.3,88.3,99.2,97.1,90.4,92.6,79.2,84.3,72.6,56.0,59.0,100.5,126.1,176.5,197.2,143.2,86.8,93.6,139.2,108.2,136.4,188.9,188.3,119.0,46.2,67.7,101.5,110.4,158.5,154.0,137.5,156.6]};
+  function renderSeason() {
+    var out = '';
+    [2025, 2024, 2023].forEach(function (y) {
+      var wk = 0, bad = 0, vbad = 0, cells = '';
+      LAST[y].forEach(function (pm, i) {
+        var d = new Date(Date.UTC(y, 9, 1 + i));
+        var dow = d.getUTCDay(), we = dow === 0 || dow === 6;
+        var a = aqi(pm), l = level(a);
+        if (!we) { wk++; if (a > 200) bad++; if (a > 300) vbad++; }
+        var lab = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+        cells += '<i class="lv-' + l.k + (we ? ' we' : '') + '" title="' + lab + ' ' + y + ': AQI about ' + a + ', ' + l.name + (we ? ', weekend' : '') + '"></i>';
+      });
+      out += '<div><div class="yh"><b>' + y + '</b><span>' + bad + ' of ' + wk + ' weekdays were above the indoor-only line (AQI over 200), ' + vbad + ' of them above 300</span></div>' +
+        '<div class="sscroll"><div class="strip">' + cells + '</div></div></div>';
+    });
+    var leg = LV.map(function (l) { return '<span class="lv-' + l.k + '"><i></i>' + l.name + '</span>'; }).join('');
+    out += '<div class="sscroll"><div class="months"><span style="left:0">Oct</span><span style="left:33.7%">Nov</span><span style="left:66.3%">Dec</span></div></div>';
+    out += '<div class="legend">' + leg + '</div>';
+    out += '<p class="note">Hourly PM2.5 model data for central Delhi (28.61 N, 77.21 E), 2023 to 2025, turned into AQI with the same CPCB bands as the rest of this page. Timestamps are assumed to be India time. A single-point model smooths out local peaks, so station readings on the worst days are likely higher than these.</p>';
+    $('seasonpanel').innerHTML = out;
+  }
+
+  renderHero(); renderRows(); renderDetail(); renderMap(); renderAlert(); renderDays(); renderSeason(); renderPitch();
+  goLive();
+})();
+</script>
+</body>
+</html>
+
